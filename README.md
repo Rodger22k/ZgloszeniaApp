@@ -1,52 +1,52 @@
-# ?? ZgloszeniaApp - System Zarzπdzania Zg≥oszeniami
+# ?? ZgloszeniaApp - System ZarzƒÖdzania Zg≈Çoszeniami
 
-Nowoczesna aplikacja webowa do zarzπdzania zg≥oszeniami, zbudowana w architekturze Blazor WebAssembly z ASP.NET Core Web API.
+Nowoczesna aplikacja webowa do zarzƒÖdzania zg≈Çoszeniami, zbudowana w architekturze Blazor WebAssembly z ASP.NET Core Web API.
 
-## ?? Opis projektu
+## ?? Opis projektu naukowego 
 
-ZgloszeniaApp to profesjonalny system do zarzπdzania zg≥oszeniami, ktÛry umoøliwia uøytkownikom tworzenie, przeglπdanie i zarzπdzanie zg≥oszeniami. Aplikacja oferuje rozbudowany system uwierzytelniania i autoryzacji z rolami uøytkownikÛw oraz funkcje administracyjne.
+ZgloszeniaApp to system do zarzƒÖdzania zg≈Çoszeniami, kt√≥ry umo≈ºliwia u≈ºytkownikom tworzenie, przeglƒÖdanie i zarzƒÖdzanie zg≈Çoszeniami. Aplikacja oferuje rozbudowany system uwierzytelniania i autoryzacji z rolami u≈ºytkownik√≥w oraz funkcje administracyjne.
 
-## ? Funkcjonalnoúci
+## ? Funkcjonalno≈õci
 
-### Dla uøytkownikÛw:
-- ?? Tworzenie nowych zg≥oszeÒ (tytu≥, opis)
-- ?? Przeglπdanie listy zg≥oszeÒ
-- ??? Usuwanie w≥asnych zg≥oszeÒ
+### Dla u≈ºytkownik√≥w:
+- ?? Tworzenie nowych zg≈Çosze≈Ñ (tytu≈Ç, opis)
+- ?? PrzeglƒÖdanie listy zg≈Çosze≈Ñ
+- ??? Usuwanie w≈Çasnych zg≈Çosze≈Ñ
 - ?? Bezpieczne logowanie i rejestracja
-- ?? Zarzπdzanie swoim profilem
+- ?? ZarzƒÖdzanie swoim profilem
 
-### Dla administratorÛw:
-- ?? Zarzπdzanie uøytkownikami
-- ?? Resetowanie hase≥ uøytkownikÛw
-- ?? Eksport wszystkich zg≥oszeÒ do pliku Excel
-- ??? Pe≥ny dostÍp do wszystkich funkcji systemu
+### Dla administrator√≥w:
+- ?? ZarzƒÖdzanie u≈ºytkownikami
+- ?? Resetowanie hase≈Ç u≈ºytkownik√≥w
+- ?? Eksport wszystkich zg≈Çosze≈Ñ do pliku Excel
+- ??? Pe≈Çny dostƒôp do wszystkich funkcji systemu
 
 ## ??? Architektura
 
-Projekt sk≥ada siÍ z trzech g≥Ûwnych komponentÛw:
+Projekt sk≈Çada siƒô z trzech g≈Ç√≥wnych komponent√≥w:
 
 ```
 ZgloszeniaApp/
 ??? ZgloszeniaApp.Frontend/    # Blazor WebAssembly (klient)
 ??? ZgloszeniaApp.Backend/     # ASP.NET Core Web API (serwer)
-??? ZgloszeniaApp.Shared/      # WspÛlne modele danych
+??? ZgloszeniaApp.Shared/      # Wsp√≥lne modele danych
 ```
 
 ### Frontend (Blazor WebAssembly)
 - **Framework**: Blazor WebAssembly (.NET 8)
 - **Uwierzytelnianie**: JWT Token-based authentication
 - **UI**: Bootstrap 5 + Bootstrap Icons
-- **Funkcje**: Pobieranie plikÛw Excel (Blazor.DownloadFileFast)
+- **Funkcje**: Pobieranie plik√≥w Excel (Blazor.DownloadFileFast)
 
 ### Backend (ASP.NET Core Web API)
 - **Framework**: ASP.NET Core 8
 - **Baza danych**: SQL Server + Entity Framework Core
 - **Uwierzytelnianie**: ASP.NET Core Identity + JWT
-- **Funkcje**: Generowanie plikÛw Excel (EPPlus)
+- **Funkcje**: Generowanie plik√≥w Excel (EPPlus)
 - **Monitoring**: Application Insights
 
 ### Shared
-- **Modele**: DTOs i wspÛlne klasy wykorzystywane przez frontend i backend
+- **Modele**: DTOs i wsp√≥lne klasy wykorzystywane przez frontend i backend
 
 ## ?? Technologie
 
@@ -68,7 +68,7 @@ ZgloszeniaApp/
 ## ?? Wymagania
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [SQL Server](https://www.microsoft.com/pl-pl/sql-server/sql-server-downloads) (LocalDB, Express lub pe≥na wersja)
+- [SQL Server](https://www.microsoft.com/pl-pl/sql-server/sql-server-downloads) (LocalDB, Express lub pe≈Çna wersja)
 - [Visual Studio 2022](https://visualstudio.microsoft.com/) lub [Visual Studio Code](https://code.visualstudio.com/)
 
 ## ?? Instalacja i uruchomienie
@@ -82,7 +82,7 @@ cd ZgloszeniaApp
 
 ### 2. Konfiguracja bazy danych
 
-OtwÛrz `ZgloszeniaApp.Backend/appsettings.json` i skonfiguruj connection string:
+Otw√≥rz `ZgloszeniaApp.Backend/appsettings.json` i skonfiguruj connection string:
 
 ```json
 {
@@ -94,7 +94,7 @@ OtwÛrz `ZgloszeniaApp.Backend/appsettings.json` i skonfiguruj connection string:
 
 ### 3. Migracja bazy danych
 
-Przejdü do folderu Backend i wykonaj migracjÍ:
+Przejd≈∫ do folderu Backend i wykonaj migracjƒô:
 
 ```bash
 cd ZgloszeniaApp.Backend
@@ -103,28 +103,28 @@ dotnet ef database update
 
 ### 4. Konfiguracja JWT
 
-W pliku `ZgloszeniaApp.Backend/appsettings.json` znajduje siÍ konfiguracja JWT:
+W pliku `ZgloszeniaApp.Backend/appsettings.json` znajduje siƒô konfiguracja JWT:
 
 ```json
 {
   "Jwt": {
-    "Key": "TwojaBardzoD≥ugaIBezpiecznaTajnaWartoscKluczaJWT",
+    "Key": "TwojaBardzoD≈ÇugaIBezpiecznaTajnaWartoscKluczaJWT",
     "Issuer": "ZgloszeniaApp",
     "Audience": "ZgloszeniaApp"
   }
 }
 ```
 
-?? **WAØNE**: W úrodowisku produkcyjnym zmieÒ `Key` na silny, losowy klucz!
+?? **WA≈ªNE**: W ≈õrodowisku produkcyjnym zmie≈Ñ `Key` na silny, losowy klucz!
 
 ### 5. Uruchomienie aplikacji
 
 #### Opcja A: Visual Studio
-1. OtwÛrz plik `ZgloszeniaApp.sln`
+1. Otw√≥rz plik `ZgloszeniaApp.sln`
 2. Ustaw `ZgloszeniaApp.Backend` jako projekt startowy
-3. Naciúnij F5 lub kliknij "Start"
+3. Naci≈õnij F5 lub kliknij "Start"
 
-#### Opcja B: Wiersz poleceÒ
+#### Opcja B: Wiersz polece≈Ñ
 
 **Terminal 1 - Backend:**
 ```bash
@@ -138,16 +138,16 @@ cd ZgloszeniaApp.Frontend
 dotnet run
 ```
 
-Aplikacja bÍdzie dostÍpna domyúlnie pod adresem: `https://localhost:7XXX`
+Aplikacja bƒôdzie dostƒôpna domy≈õlnie pod adresem: `https://localhost:7XXX`
 
-## ?? Domyúlne konto administratora
+## ?? Domy≈õlne konto administratora
 
 Po pierwszym uruchomieniu aplikacji automatycznie tworzony jest administrator:
 
 - **Email**: `admin@example.com`
-- **Has≥o**: `AdminHaslo123!`
+- **Has≈Ço**: `AdminHaslo123!`
 
-?? **WAØNE**: ZmieÒ has≥o administratora po pierwszym logowaniu!
+?? **WA≈ªNE**: Zmie≈Ñ has≈Ço administratora po pierwszym logowaniu!
 
 ## ?? Struktura projektu
 
@@ -160,7 +160,7 @@ ZgloszeniaApp/
 ?   ?   ??? AdminController.cs
 ?   ?   ??? ZgloszeniaController.cs
 ?   ??? Data/                  # Entity Framework DbContext
-?   ??? Excel/                 # Obs≥uga eksportu do Excel
+?   ??? Excel/                 # Obs≈Çuga eksportu do Excel
 ?   ??? Migrations/            # Migracje bazy danych
 ?   ??? Models/                # Modele danych (ApplicationUser)
 ?   ??? Program.cs             # Konfiguracja aplikacji
@@ -173,11 +173,11 @@ ZgloszeniaApp/
 ?   ?   ??? Users.razor
 ?   ?   ??? Zgloszenia.razor
 ?   ??? Services/              # Serwisy komunikacji z API
-?   ??? Shared/                # WspÛlne komponenty (NavMenu, MainLayout)
+?   ??? Shared/                # Wsp√≥lne komponenty (NavMenu, MainLayout)
 ?   ??? wwwroot/               # Pliki statyczne
 ?
 ??? ZgloszeniaApp.Shared/
-    ??? Models/                # WspÛlne modele (DTOs)
+    ??? Models/                # Wsp√≥lne modele (DTOs)
         ??? LoginModel.cs
         ??? LoginResult.cs
         ??? RegisterModel.cs
@@ -186,12 +186,12 @@ ZgloszeniaApp/
         ??? Zgloszenie.cs
 ```
 
-## ?? BezpieczeÒstwo
+## ?? Bezpiecze≈Ñstwo
 
 - **Uwierzytelnianie**: JWT Token-based authentication
 - **Autoryzacja**: Role-based access control (Administrator, User)
-- **Hashowanie hase≥**: ASP.NET Core Identity (PBKDF2)
-- **HTTPS**: Wymuszony protokÛ≥ HTTPS
+- **Hashowanie hase≈Ç**: ASP.NET Core Identity (PBKDF2)
+- **HTTPS**: Wymuszony protok√≥≈Ç HTTPS
 - **Walidacja**: DataAnnotations w modelach
 
 ## ?? Model danych
@@ -214,41 +214,36 @@ Rozszerza standardowy `IdentityUser` z ASP.NET Core Identity.
 ## ?? API Endpoints
 
 ### Account
-- `POST /api/Account/register` - Rejestracja nowego uøytkownika
+- `POST /api/Account/register` - Rejestracja nowego u≈ºytkownika
 - `POST /api/Account/login` - Logowanie
 
 ### Admin
-- `GET /api/Admin/users` - Lista wszystkich uøytkownikÛw (tylko admin)
-- `POST /api/Admin/reset-password` - Reset has≥a (tylko admin)
+- `GET /api/Admin/users` - Lista wszystkich u≈ºytkownik√≥w (tylko admin)
+- `POST /api/Admin/reset-password` - Reset has≈Ça (tylko admin)
 
 ### Zgloszenia
-- `GET /api/Zgloszenia` - Pobierz wszystkie zg≥oszenia
-- `GET /api/Zgloszenia/{id}` - Pobierz zg≥oszenie po ID
-- `POST /api/Zgloszenia` - UtwÛrz nowe zg≥oszenie
-- `DELETE /api/Zgloszenia/{id}` - UsuÒ zg≥oszenie
+- `GET /api/Zgloszenia` - Pobierz wszystkie zg≈Çoszenia
+- `GET /api/Zgloszenia/{id}` - Pobierz zg≈Çoszenie po ID
+- `POST /api/Zgloszenia` - Utw√≥rz nowe zg≈Çoszenie
+- `DELETE /api/Zgloszenia/{id}` - Usu≈Ñ zg≈Çoszenie
 - `GET /api/Zgloszenia/ExportAllZgloszenia` - Eksport do Excel (tylko admin)
 
-## ?? Wk≥ad w projekt
+## ?? Wk≈Çad w projekt
 
-Jeúli chcesz wnieúÊ wk≥ad w projekt:
+Je≈õli chcesz wnie≈õƒá wk≈Çad w projekt:
 
 1. Zforkuj repozytorium
-2. UtwÛrz branch dla swojej funkcjonalnoúci (`git checkout -b feature/AmazingFeature`)
+2. Utw√≥rz branch dla swojej funkcjonalno≈õci (`git checkout -b feature/AmazingFeature`)
 3. Commituj zmiany (`git commit -m 'Add some AmazingFeature'`)
 4. Push do brancha (`git push origin feature/AmazingFeature`)
-5. OtwÛrz Pull Request
+5. Otw√≥rz Pull Request
 
 ## ?? Licencja
 
-Ten projekt jest licencjonowany na zasadach licencji MIT - szczegÛ≥y w pliku [LICENSE](LICENSE).
+Ten projekt jest licencjonowany na zasadach licencji MIT - szczeg√≥≈Çy w pliku [LICENSE](LICENSE).
 
-## ?? Kontakt
 
-Twoje ImiÍ - [@twitter_handle](https://twitter.com/twitter_handle) - email@example.com
-
-Link do projektu: [https://github.com/twoja-nazwa-uzytkownika/ZgloszeniaApp](https://github.com/twoja-nazwa-uzytkownika/ZgloszeniaApp)
-
-## ?? PodziÍkowania
+## ?? Podziƒôkowania
 
 - [Bootstrap](https://getbootstrap.com/)
 - [Bootstrap Icons](https://icons.getbootstrap.com/)
@@ -257,4 +252,4 @@ Link do projektu: [https://github.com/twoja-nazwa-uzytkownika/ZgloszeniaApp](htt
 
 ---
 
-? Jeúli podoba Ci siÍ ten projekt, zostaw gwiazdkÍ na GitHubie!
+? Je≈õli podoba Ci siƒô ten projekt, zostaw gwiazdkƒô na GitHubie!
