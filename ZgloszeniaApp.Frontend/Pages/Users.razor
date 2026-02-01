@@ -1,0 +1,215 @@
+﻿@page "/users"
+@attribute [Authorize(Roles = "Administrator")]
+@using Microsoft.AspNetCore.Authorization
+@using ZgloszeniaApp.Shared.Models
+@inject HttpClient Http
+
+<h3>Zarządzanie Użytkownikami</h3>
+
+@if (users == null)
+{
+    <p><em>Ładowanie użytkowników...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Email</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" @onclick="() => EditUser(user)">Edytuj</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => PotwierdzUsuniecie(user.Id)">Usuń</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!-- Modal do edycji emaila i resetu hasła -->
+@if (editUser != null)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edycja Użytkownika</h5>
+                    <button type="button" class="btn-close" @onclick="CancelEdit" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Email:</label>
+                        <InputText @bind-Value="editUser.Email" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nowe Hasło (opcjonalnie):</label>
+                        <div class="input-group">
+                            <InputText @bind-Value="newPassword"
+                                       type="@passwordFieldType"
+                                       class="form-control" />
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    @onclick="TogglePasswordVisibility">
+                                <i class="@IconClass"></i>
+                            </button>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CancelEdit">Anuluj</button>
+                    <button class="btn btn-primary" @onclick="SaveUser">Zapisz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+<!-- Modal do potwierdzenia usunięcia użytkownika -->
+@if (!string.IsNullOrEmpty(userIdToDelete))
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Potwierdź usunięcie użytkownika</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Czy na pewno chcesz usunąć tego użytkownika?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="AnulujUsuniecie">Anuluj</button>
+                    <button class="btn btn-danger" @onclick="UsunUzytkownika">Usuń</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+    private List<UserDto> users;
+    private UserDto editUser;        // Użytkownik do edycji
+    private string errorMessage;
+    private string userIdToDelete;   // Id użytkownika do usunięcia
+
+    // Pola do resetu hasła
+    private string newPassword;
+    private bool showPassword;       // flaga do togglowania
+
+    // Zależnie od showPassword zwracamy "text" lub "password"
+    private string passwordFieldType => showPassword ? "text" : "password";
+    private string IconClass => showPassword ? "bi bi-eye-slash" : "bi bi-eye";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        // Pobieranie listy użytkowników z /api/Admin/GetUsers
+        users = await Http.GetFromJsonAsync<List<UserDto>>("api/Admin/GetUsers");
+    }
+
+    private void EditUser(UserDto user)
+    {
+        // Otwieramy modal edycji
+        editUser = new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email
+            };
+        newPassword = string.Empty;
+        errorMessage = string.Empty;
+    }
+
+    private void CancelEdit()
+    {
+        editUser = null;
+        newPassword = string.Empty;
+        errorMessage = string.Empty;
+        showPassword = false;
+    }
+
+    private async Task SaveUser()
+    {
+        errorMessage = string.Empty;
+        // Najpierw zapisujemy nowy Email
+        var updateEmailResponse = await Http.PostAsJsonAsync("api/Admin/UpdateUserEmail", editUser);
+        if (!updateEmailResponse.IsSuccessStatusCode)
+        {
+            errorMessage = await updateEmailResponse.Content.ReadAsStringAsync();
+            return;
+        }
+
+        // Jeśli newPassword nie jest puste, resetujemy hasło
+        if (!string.IsNullOrEmpty(newPassword))
+        {
+            var resetDto = new ResetPasswordDto
+                {
+                    UserId = editUser.Id,
+                    NewPassword = newPassword
+                };
+            var resetResponse = await Http.PostAsJsonAsync("api/Admin/ResetPassword", resetDto);
+            if (!resetResponse.IsSuccessStatusCode)
+            {
+                errorMessage = await resetResponse.Content.ReadAsStringAsync();
+                return;
+            }
+        }
+
+        // Jeśli wszystko OK, zamykamy modal i odświeżamy listę
+        editUser = null;
+        showPassword = false;
+        await LoadUsers();
+    }
+
+    private void PotwierdzUsuniecie(string userId)
+    {
+        userIdToDelete = userId;
+    }
+
+    private void AnulujUsuniecie()
+    {
+        userIdToDelete = null;
+    }
+
+    private async Task UsunUzytkownika()
+    {
+        if (!string.IsNullOrEmpty(userIdToDelete))
+        {
+            var response = await Http.DeleteAsync($"api/Admin/DeleteUser/{userIdToDelete}");
+            if (response.IsSuccessStatusCode)
+            {
+                // Usunięcie OK
+                users.RemoveAll(u => u.Id == userIdToDelete);
+            }
+            else
+            {
+                var msg = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Błąd usuwania: {msg}";
+            }
+            userIdToDelete = null;
+        }
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        showPassword = !showPassword;
+    }
+}
+

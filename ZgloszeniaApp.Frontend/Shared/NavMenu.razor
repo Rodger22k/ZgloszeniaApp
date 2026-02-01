@@ -1,0 +1,64 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using ZgloszeniaApp.Frontend.Services
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">ZgloszeniaApp</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Przełącz nawigację">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Główny UL z elementami z lewej -->
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="">Strona Główna</NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="zgloszenia">Zgłoszenia</NavLink>
+                </li>
+
+                <AuthorizeView Roles="Administrator" Context="adminContext">
+                    <Authorized>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="users">Zarządzanie użytkownikami</NavLink>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+            </ul>
+
+            <!-- UL z prawej -->
+            <ul class="navbar-nav">
+                <AuthorizeView>
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" @onclick="Logout">Wyloguj się</a>
+                        </li>
+                    </Authorized>
+                    <NotAuthorized>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="login">Zaloguj się</NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="register">Zarejestruj się</NavLink>
+                        </li>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+@code {
+    private async Task Logout()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
+        await customAuthStateProvider.MarkUserAsLoggedOut();
+        NavigationManager.NavigateTo("login");
+    }
+}
+
+
+

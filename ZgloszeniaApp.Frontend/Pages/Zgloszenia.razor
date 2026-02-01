@@ -1,0 +1,300 @@
+﻿@page "/zgloszenia"
+
+
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Authorization
+
+@using Blazor.DownloadFileFast          
+@using Blazor.DownloadFileFast.Interfaces
+
+@attribute [Authorize]                  
+@inject ZgloszeniaApp.Frontend.Services.ZgloszenieService ZgloszenieService
+@inject HttpClient Http
+@inject IBlazorDownloadFileService DownloadFileService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<div class="container mt-4">
+    <h3 class="mb-4">
+        <i class="bi bi-card-list"></i> Lista Zgłoszeń
+    </h3>
+
+    <button class="btn btn-primary mb-4" @onclick="OtworzModal">
+        <i class="bi bi-plus-lg"></i> Dodaj nowe zgłoszenie
+    </button>
+
+    @if (listaZgloszen == null)
+    {
+        <p><em>Ładowanie zgłoszeń...</em></p>
+    }
+    else if (!listaZgloszen.Any())
+    {
+        <p><em>Brak zgłoszeń.</em></p>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            @foreach (var zgloszenie in listaZgloszen)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Tytuł: @zgloszenie.Tytul</h5>
+                            <p class="card-text">
+                                <strong>Opis:</strong> @zgloszenie.Opis
+                            </p>
+                        </div>
+                        <!-- Przycisk usuwania zgłoszenia -->
+                        <div class="card-footer d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Dodano: @zgloszenie.DataUtworzenia.ToString("dd-MM-yyyy HH:mm")
+                            </small>
+                            <button class="btn btn-danger btn-sm" @onclick="() => PotwierdzUsuniecie(zgloszenie.Id)">
+                                <i class="bi bi-trash"></i> Usuń
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Dwa przyciski dla Administratora: Eksport i Import Excel -->
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+        <!-- Prawy dolny róg - Eksport Excel -->
+        <div style="position: fixed; bottom: 20px; right: 20px;">
+            <button class="btn btn-success me-2" @onclick="EksportExcel">
+                Eksport do Excel
+            </button>
+
+            <!-- Przyciskiem otwieramy modal do Importu pliku -->
+            <button class="btn btn-secondary" @onclick="OtworzImportModal">
+                Importuj z Excela
+            </button>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+
+
+
+@code {
+    // --- Główna logika zgłoszeń ---
+    private List<ZgloszeniaApp.Shared.Models.Zgloszenie> listaZgloszen;
+    private ZgloszeniaApp.Shared.Models.Zgloszenie NoweZgloszenie = new();
+    private bool ModalOtwarty = false;
+    private int? ZgloszenieDoUsunieciaId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        listaZgloszen = await ZgloszenieService.GetZgloszenia();
+    }
+
+    private void OtworzModal()
+    {
+        ModalOtwarty = true;
+    }
+
+    private void ZamknijModal()
+    {
+        ModalOtwarty = false;
+        NoweZgloszenie = new();
+    }
+
+    private async Task DodajZgloszenie()
+    {
+        var created = await ZgloszenieService.AddZgloszenie(NoweZgloszenie);
+        listaZgloszen.Add(created);
+
+        NoweZgloszenie = new();
+        ModalOtwarty = false;
+    }
+
+    private void PotwierdzUsuniecie(int id)
+    {
+        ZgloszenieDoUsunieciaId = id;
+    }
+
+    private async Task UsunZgloszenie()
+    {
+        if (ZgloszenieDoUsunieciaId.HasValue)
+        {
+            await ZgloszenieService.DeleteZgloszenie(ZgloszenieDoUsunieciaId.Value);
+            var zgl = listaZgloszen.FirstOrDefault(z => z.Id == ZgloszenieDoUsunieciaId.Value);
+            if (zgl != null) listaZgloszen.Remove(zgl);
+
+            ZgloszenieDoUsunieciaId = null;
+        }
+    }
+
+    private void AnulujUsuniecie()
+    {
+        ZgloszenieDoUsunieciaId = null;
+    }
+
+    // --- Eksport Excel ---
+    private async Task EksportExcel()
+    {
+        var url = "api/Zgloszenia/ExportAllZgloszenia";
+        var response = await Http.GetAsync(url);
+        if (response.IsSuccessStatusCode)
+        {
+            var fileBytes = await response.Content.ReadAsByteArrayAsync();
+            // W v0.2 biblioteki bywa "DownloadFileAsync" zamiast "DownloadFileFromByteArrayAsync"
+            await DownloadFileService.DownloadFileAsync(
+                "Zgloszenia.xlsx",
+                fileBytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            );
+        }
+        else
+        {
+            // Obsługa błędu
+        }
+    }
+
+    // --- Import Excel ---
+    // Czy modal importu jest otwarty
+    private bool importModalOtwarty = false;
+
+    // Przechowuje wybrany plik
+    private IBrowserFile selectedFile;
+    private bool canUpload = false;
+    private string infoMessage;
+
+    private void OtworzImportModal()
+    {
+        importModalOtwarty = true;
+        infoMessage = null;
+        canUpload = false;
+        selectedFile = null;
+    }
+
+    private void ZamknijImportModal()
+    {
+        importModalOtwarty = false;
+    }
+
+    // Wywoływane po wybraniu pliku
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        canUpload = (selectedFile != null);
+        infoMessage = $"Wybrano plik: {selectedFile?.Name}";
+    }
+
+    private async Task UploadFile()
+    {
+        if (selectedFile == null) return;
+
+        var formData = new MultipartFormDataContent();
+        var fileContent = new StreamContent(selectedFile.OpenReadStream(10_000_000)); // limit 10 MB
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+        formData.Add(fileContent, "excelFile", selectedFile.Name);
+
+        var response = await Http.PostAsync("api/Zgloszenia/ImportZgloszenia", formData);
+        if (response.IsSuccessStatusCode)
+        {
+            var msg = await response.Content.ReadAsStringAsync();
+            infoMessage = $"Sukces: {msg}";
+            // Odśwież listę zgłoszeń
+            listaZgloszen = await ZgloszenieService.GetZgloszenia();
+        }
+        else
+        {
+            var err = await response.Content.ReadAsStringAsync();
+            infoMessage = $"Błąd: {err}";
+        }
+        canUpload = false;
+    }
+}
+
+@* Modal do dodawania nowego zgłoszenia *@
+@if (ModalOtwarty)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Dodaj nowe zgłoszenie</h5>
+                    <button type="button" class="btn-close" @onclick="ZamknijModal" aria-label="Close"></button>
+                </div>
+                <EditForm Model="NoweZgloszenie" OnValidSubmit="DodajZgloszenie">
+                    <div class="modal-body">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        <div class="mb-3">
+                            <label class="form-label">Tytuł:</label>
+                            <InputText @bind-Value="NoweZgloszenie.Tytul" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Opis:</label>
+                            <InputTextArea @bind-Value="NoweZgloszenie.Opis" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="ZamknijModal">Anuluj</button>
+                        <button type="submit" class="btn btn-primary">Dodaj</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@* Modal do potwierdzenia usuwania zgłoszenia *@
+@if (ZgloszenieDoUsunieciaId.HasValue)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Potwierdź usunięcie</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Czy na pewno chcesz usunąć to zgłoszenie?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="AnulujUsuniecie">Anuluj</button>
+                    <button class="btn btn-danger" @onclick="UsunZgloszenie">Usuń</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@* Modal do importowania pliku Excel (jeśli importModalOtwarty == true) *@
+@if (importModalOtwarty)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Importuj Zgłoszenia z Excela</h5>
+                    <button type="button" class="btn-close" @onclick="ZamknijImportModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(infoMessage))
+                    {
+                        <div class="alert alert-info">@infoMessage</div>
+                    }
+
+                    <InputFile OnChange="OnFileSelected" />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="ZamknijImportModal">Anuluj</button>
+                    <button class="btn btn-primary" @onclick="UploadFile" disabled="@(!canUpload)">Wgraj</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+

@@ -1,0 +1,86 @@
+﻿@page "/login"
+@using ZgloszeniaApp.Frontend.Services
+@using ZgloszeniaApp.Shared.Models
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Authorization
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h3>Logowanie</h3>
+
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Email:</label>
+        <InputText @bind-Value="loginModel.Email" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Hasło:</label>
+        <div class="input-group">
+            <!-- Pole hasła z dynamicznym type -->
+            <InputText @bind-Value="loginModel.Password"
+                       type="@passwordFieldType"
+                       class="form-control" />
+
+            <!-- Przycisk z ikoną "oko" -->
+            <button type="button" class="btn btn-outline-secondary" @onclick="TogglePasswordVisibility">
+                <i class="@IconClass"></i>
+            </button>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Zaloguj się</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3">@errorMessage</div>
+}
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+    private string errorMessage;
+
+    // Flaga kontrolująca widoczność hasła
+    private bool showPassword;
+
+    // Zależnie od showPassword zwracamy "text" lub "password"
+    private string passwordFieldType => showPassword ? "text" : "password";
+
+    // Klasa ikonki zależna od showPassword
+    private string IconClass => showPassword ? "bi bi-eye-slash" : "bi bi-eye";
+
+    private async Task HandleLogin()
+    {
+        errorMessage = string.Empty;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/Account/login", loginModel);
+            if (response.IsSuccessStatusCode)
+            {
+                var loginResult = await response.Content.ReadFromJsonAsync<LoginResult>();
+                var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
+                await customAuthStateProvider.MarkUserAsAuthenticated(loginResult.Token);
+
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = "Nieprawidłowy email lub hasło.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Wystąpił błąd podczas logowania: {ex.Message}";
+        }
+    }
+
+    // Przełączanie widoczności hasła
+    private void TogglePasswordVisibility()
+    {
+        showPassword = !showPassword;
+    }
+}

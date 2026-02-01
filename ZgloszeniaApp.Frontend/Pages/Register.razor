@@ -1,0 +1,92 @@
+﻿@page "/register"
+@using ZgloszeniaApp.Shared.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Rejestracja</h3>
+
+<EditForm Model="registerModel" OnValidSubmit="HandleRegister">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Email:</label>
+        <InputText @bind-Value="registerModel.Email" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Hasło:</label>
+        <div class="input-group">
+            <InputText @bind-Value="registerModel.Password"
+                       type="@passwordFieldType"
+                       class="form-control" />
+
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    @onclick="TogglePasswordVisibility">
+                <i class="@IconClass"></i>
+            </button>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Zarejestruj się</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3">@errorMessage</div>
+}
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success mt-3">@successMessage</div>
+}
+
+@code {
+    private RegisterModel registerModel = new RegisterModel();
+    private string errorMessage;
+    private string successMessage;
+
+    // Flaga sterująca widocznością hasła
+    private bool showPassword;
+
+    // Właściwość określająca typ pola: "text" lub "password"
+    private string passwordFieldType => showPassword ? "text" : "password";
+
+    // Właściwość określająca klasę ikony (Bootstrap Icons)
+    private string IconClass => showPassword ? "bi bi-eye-slash" : "bi bi-eye";
+
+    private async Task HandleRegister()
+    {
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/Account/register", registerModel);
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Rejestracja zakończona sukcesem. Możesz się teraz zalogować.";
+                // Możesz automatycznie przekierować do logowania po kilku sekundach:
+                // await Task.Delay(2000);
+                // NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                // Odczytanie błędów (tekstowych) z serwera
+                var result = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Błąd rejestracji: {result}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Wystąpił błąd podczas rejestracji: {ex.Message}";
+        }
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        showPassword = !showPassword;
+    }
+}
+
