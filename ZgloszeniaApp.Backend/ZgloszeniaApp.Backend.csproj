@@ -32,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Formats.Asn1" Version="6.0.1" />
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
